@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>Notes on Machine Learning and Other - Michal Piekarczyk</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">Notes on Machine Learning and Other </a></h1>
+                <nav><ul>
+                    <li><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="/doing-the-wikipedia-chi-square-example.html">Doing the wikipedia chi square example</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2017-11-26T12:00:01-05:00">
+                Published: Sun 26 November 2017
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info --><p>The simple goal here is to take the example in https://en.wikipedia.org/wiki/Chi-squared_test#Example_chi-squared_test_for_categorical_data and finish calculating the test statistic. It looks like at the time of this writing that was left as an exercise for the reader.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># lets say oee(o,e) is the calculation done in each of the 3x4 cells</span>
+<span class="n">oee</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">o</span><span class="p">,</span><span class="n">e</span><span class="p">:</span> <span class="p">((</span><span class="n">o</span> <span class="o">-</span> <span class="n">e</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">e</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">90</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">95</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">51</span><span class="p">,</span><span class="mi">20</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">35</span><span class="p">]])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Total number of people sampled.</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">total</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>650
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>(3, 4)
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># totals for each neighborhood</span>
+<span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">sum</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">neighborhood_totals</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[150, 150, 200, 150]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># get expected value of a class on a given neighborhood</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># lets find the expected values for each of the three classes white collar, blue collar and no collar</span>
+<span class="n">class_totals</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">class_totals</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[349, 151, 150]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">class_probability_priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">class_probability_priors</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[0.53692307692307695, 0.2323076923076923, 0.23076923076923078]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">expected_values</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[((</span><span class="n">neighborhood_totals</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span><span class="p">))</span>
+     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">expected_values</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[[80.538461538461547,
+  80.538461538461547,
+  107.38461538461539,
+  80.538461538461547],
+ [34.846153846153847,
+  34.846153846153847,
+  46.46153846153846,
+  34.846153846153847],
+ [34.61538461538462, 34.61538461538462, 46.153846153846153, 34.61538461538462]]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># sum of cells on first neighborhood expected values should match the actual sum ...</span>
+<span class="k">print</span> <span class="mf">80.54</span> <span class="o">+</span> <span class="mf">34.85</span> <span class="o">+</span> <span class="mf">34.62</span>
+<span class="k">print</span> <span class="n">neighborhood_totals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>150.01
+150
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># ok cool ^^ that looks about right.</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># lets get the values of (observed - expected)^2 / (expected)  , for each of the 3x4 cells</span>
+<span class="n">parts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">oee</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">parts</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>array([[  1.11152744e+00,   5.23760194e+00,   1.06678422e-01,
+          2.59672324e+00],
+       [  6.73968416e-01,   6.59008321e+00,   4.43326541e-01,
+          6.32518254e+00],
+       [  6.15384615e-01,   8.37606838e-01,   2.88461538e-02,
+          4.27350427e-03]])
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># the chi square test statistic</span>
+<span class="n">test_statistic</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">test_statistic</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>24.571202858582595
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="n">oee</span><span class="p">(</span><span class="mi">95</span><span class="p">,</span> <span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>(80.538461538461547, 2.596723238557046)
+</pre></div>
+
+
+<p>So if per the wikipedia page, the number of degrees of freedom here 
+is <code>(3 - 1)(4 - 1) = 6</code>
+just eye balling https://en.wikipedia.org/wiki/File:Chi-square_pdf.svg  , I think the probability of <code>24.57</code> given k=6 degrees of freedom is a bit low...</p>
+<p>So the null hypothesis that " each persons neighborhood of residence is independent of the persons occupational classification " feels like it can be rejected.. </p>
+<div class="highlight"><pre><span></span><span class="c1"># for the sake of argument... lets engineer a dataset which should pass the null hypothesis...</span>
+<span class="c1"># basically lets match the expected values... approximatly.. </span>
+<span class="n">data2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span>
+<span class="p">])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">data2</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>array([[  80.,   80.,  107.,   80.],
+       [  34.,   34.,   46.,   34.],
+       [  34.,   34.,   46.,   34.]])
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># total here should be roughly like total above i think</span>
+<span class="n">data2</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>643.0
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># calculate the test statistic for data2...</span>
+<span class="k">def</span> <span class="nf">get_test_statistic</span><span class="p">(</span><span class="n">the_data</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">the_data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span> <span class="o">=</span> <span class="n">the_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">the_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">sum</span><span class="p">([</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+
+    <span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">sum</span><span class="p">([</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+
+    <span class="n">class_totals</span> <span class="o">=</span> <span class="p">[</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+
+    <span class="n">expected_values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[((</span><span class="n">neighborhood_totals</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span><span class="p">))</span>
+         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">oee</span><span class="p">(</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
+
+    <span class="n">test_statistic</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">test_statistic</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">get_test_statistic</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>0.0044994022598769338
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># wow thats almost 0 but hmm.. the probability value for a chi-square distribution of k=6 ,</span>
+<span class="c1"># for x=0.004499 is pretty small.. </span>
+<span class="c1"># hmmm..</span>
+</pre></div>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/backing-up-macbook-2011-ssd.html" rel="bookmark"
+                           title="Permalink to Backing up Macbook 2011 SSD">Backing up Macbook 2011 SSD</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2017-08-13T12:16:01-05:00">
+                Published: Sun 13 August 2017
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h3>2011 macbook air</h3>
+<ul>
+<li>Looks like pinout on the SSD is 12 + 6 pins.</li>
+<li>But a macbook air to SATA converter I had gotten earlier was for a 18 + 8 pin layout. It is labeled as the "Ver 2.0" ![adapter]({{ site.url }}/converter-2012.jpg) for macbook 2012.</li>
+<li>So I need …</li></ul>
+                <a class="readmore" href="/backing-up-macbook-2011-ssd.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+                </ol><!-- /#posts-list -->
+                </section><!-- /#content -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>links</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
