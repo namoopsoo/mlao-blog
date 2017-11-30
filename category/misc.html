@@ -20,7 +20,112 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../doing-the-wikipedia-chi-square-example.html">Doing the wikipedia chi square example</a></h1>
+                    <h1 class="entry-title"><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">Stacked area chart, using pandas dataframe and groupby date</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2017-11-29T17:00:01-05:00">
+                Published: Wed 29 November 2017
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="../category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info --><ul>
+<li>the pandas part... will present this part later...</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>  <span class="c1"># 7</span>
+<span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span>
+<span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2017-11-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-04&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-04&#39;</span><span class="p">,</span> <span class="p">],</span>
+<span class="s1">&#39;pushups&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+<span class="s1">&#39;crunches&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
+<span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">aggreg_proportions_by_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Apply func used to help dedupe log data &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">num_rows</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">num_rows</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pushups&#39;</span><span class="p">,</span> 
+                        <span class="s1">&#39;crunches&#39;</span><span class="p">,</span> <span class="p">]:</span>
+            <span class="n">foo_dict</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+            <span class="n">num_True</span> <span class="o">=</span> <span class="n">foo_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">new_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                        <span class="n">key</span><span class="p">:</span> <span class="n">num_True</span><span class="p">,</span>
+                        <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;Proportion&#39;</span><span class="p">:</span> <span class="n">num_True</span><span class="o">/</span><span class="n">num_rows</span><span class="p">}),</span>
+        <span class="n">new_row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_row</span>
+
+<span class="n">proportions_by_date_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+        <span class="n">by</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">aggreg_proportions_by_row</span><span class="p">)</span>
+
+<span class="n">proportion_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;crunchesProportion&#39;</span><span class="p">,</span>
+<span class="s1">&#39;pushupsProportion&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">make_xtick_labels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given x, step the labels every &lt;step&gt;</span>
+<span class="sd">    Aka, take every &lt;step&gt;th x label</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">x_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>  <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">x_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x_ticks</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;x_ticks&#39;</span><span class="p">:</span> <span class="n">x_ticks</span><span class="p">,</span> <span class="s1">&#39;x_labels&#39;</span><span class="p">:</span> <span class="n">x_labels</span><span class="p">}</span>
+
+<span class="c1"># Make data ready for output...</span>
+<span class="n">x_labels</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_labels</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="p">[</span><span class="n">proportion_keys</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+<span class="n">y_list</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">proportion_keys</span><span class="p">}</span>
+<span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">make_xtick_labels</span><span class="p">(</span><span class="n">x_labels</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fd</span><span class="p">)</span>
+</pre></div>
+
+
+<ul>
+<li>jupyter...</li>
+</ul>
+<div class="highlight"><pre><span></span>fn = &#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;
+with open(fn) as fd:
+    data = json.load(fd)
+x = data[&#39;x&#39;]
+x_labels = data[&#39;x_labels&#39;]
+x_ticks = data[&#39;x_ticks&#39;]
+y = data[&#39;y&#39;]
+labels = data[&#39;labels&#39;]
+
+# Plot
+plt.stackplot(x, y, labels=labels)
+plt.legend(loc=&#39;upper left&#39;)
+
+# use the plt.xticks function to custom labels
+plt.xticks(x_ticks, x_labels, rotation=45, fontweight=&#39;bold&#39;, fontsize=&#39;10&#39;, horizontalalignment=&#39;right&#39;)
+</pre></div>
+
+
+<ul>
+<li>==&gt;
+<a href="33415651-e1488734-d565-11e7-88cb-6eeb67574c43.png">image</a></li>
+<li>In the above, used https://stackoverflow.com/a/12608937 , to finally understand how to "step" the tick marks of x axis</li>
+</ul>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="../doing-the-wikipedia-chi-square-example.html" rel="bookmark"
+                           title="Permalink to Doing the wikipedia chi square example">Doing the wikipedia chi square example</a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-11-26T12:00:01-05:00">
                 Published: Sun 26 November 2017
@@ -31,7 +136,7 @@
         </address>
 <p>In <a href="../category/misc.html">misc</a>.</p>
 
-</footer><!-- /.post-info --><p>The simple goal here is to take the example in https://en.wikipedia.org/wiki/Chi-squared_test#Example_chi-squared_test_for_categorical_data and finish calculating the test statistic. It looks like at the time of this writing that was left as an exercise for the reader.</p>
+</footer><!-- /.post-info -->                <p>The simple goal here is to take the example in https://en.wikipedia.org/wiki/Chi-squared_test#Example_chi-squared_test_for_categorical_data and finish calculating the test statistic. It looks like at the time of this writing that was left as an exercise for the reader.</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 </pre></div>
 
@@ -40,239 +145,10 @@
 </pre></div>
 
 
-<div class="highlight"><pre><span></span><span class="c1"># lets say oee(o,e) is the calculation done in each of the 3x4 cells</span>
-<span class="n">oee</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">o</span><span class="p">,</span><span class="n">e</span><span class="p">:</span> <span class="p">((</span><span class="n">o</span> <span class="o">-</span> <span class="n">e</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">e</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">90</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="mi">104</span><span class="p">,</span><span class="mi">95</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">51</span><span class="p">,</span><span class="mi">20</span><span class="p">],[</span><span class="mi">30</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">45</span><span class="p">,</span><span class="mi">35</span><span class="p">]])</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># Total number of people sampled.</span>
-<span class="n">total</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">total</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>650
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>(3, 4)
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># totals for each neighborhood</span>
-<span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="nb">sum</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">neighborhood_totals</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>[150, 150, 200, 150]
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># get expected value of a class on a given neighborhood</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># lets find the expected values for each of the three classes white collar, blue collar and no collar</span>
-<span class="n">class_totals</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">class_totals</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>[349, 151, 150]
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">class_probability_priors</span> <span class="o">=</span> <span class="p">[</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">class_probability_priors</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>[0.53692307692307695, 0.2323076923076923, 0.23076923076923078]
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">expected_values</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[((</span><span class="n">neighborhood_totals</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span><span class="p">))</span>
-     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">expected_values</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>[[80.538461538461547,
-  80.538461538461547,
-  107.38461538461539,
-  80.538461538461547],
- [34.846153846153847,
-  34.846153846153847,
-  46.46153846153846,
-  34.846153846153847],
- [34.61538461538462, 34.61538461538462, 46.153846153846153, 34.61538461538462]]
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># sum of cells on first neighborhood expected values should match the actual sum ...</span>
-<span class="k">print</span> <span class="mf">80.54</span> <span class="o">+</span> <span class="mf">34.85</span> <span class="o">+</span> <span class="mf">34.62</span>
-<span class="k">print</span> <span class="n">neighborhood_totals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>150.01
-150
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># ok cool ^^ that looks about right.</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># lets get the values of (observed - expected)^2 / (expected)  , for each of the 3x4 cells</span>
-<span class="n">parts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">oee</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">parts</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>array([[  1.11152744e+00,   5.23760194e+00,   1.06678422e-01,
-          2.59672324e+00],
-       [  6.73968416e-01,   6.59008321e+00,   4.43326541e-01,
-          6.32518254e+00],
-       [  6.15384615e-01,   8.37606838e-01,   2.88461538e-02,
-          4.27350427e-03]])
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># the chi square test statistic</span>
-<span class="n">test_statistic</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">test_statistic</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>24.571202858582595
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="n">oee</span><span class="p">(</span><span class="mi">95</span><span class="p">,</span> <span class="n">expected_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>(80.538461538461547, 2.596723238557046)
-</pre></div>
-
-
-<p>So if per the wikipedia page, the number of degrees of freedom here 
-is <code>(3 - 1)(4 - 1) = 6</code>
-just eye balling https://en.wikipedia.org/wiki/File:Chi-square_pdf.svg  , I think the probability of <code>24.57</code> given k=6 degrees of freedom is a bit low...</p>
-<p>So the null hypothesis that " each persons neighborhood of residence is independent of the persons occupational classification " feels like it can be rejected.. </p>
-<div class="highlight"><pre><span></span><span class="c1"># for the sake of argument... lets engineer a dataset which should pass the null hypothesis...</span>
-<span class="c1"># basically lets match the expected values... approximatly.. </span>
-<span class="n">data2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-    <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span>
-<span class="p">])</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">data2</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>array([[  80.,   80.,  107.,   80.],
-       [  34.,   34.,   46.,   34.],
-       [  34.,   34.,   46.,   34.]])
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># total here should be roughly like total above i think</span>
-<span class="n">data2</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>643.0
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># calculate the test statistic for data2...</span>
-<span class="k">def</span> <span class="nf">get_test_statistic</span><span class="p">(</span><span class="n">the_data</span><span class="p">):</span>
-    <span class="n">total</span> <span class="o">=</span> <span class="n">the_data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">num_classes</span><span class="p">,</span> <span class="n">num_neighborhoods</span> <span class="o">=</span> <span class="n">the_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">the_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="nb">sum</span><span class="p">([</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-
-    <span class="n">neighborhood_totals</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="nb">sum</span><span class="p">([</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-
-    <span class="n">class_totals</span> <span class="o">=</span> <span class="p">[</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
-
-    <span class="n">expected_values</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">[((</span><span class="n">neighborhood_totals</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">class_totals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">total</span><span class="p">))</span>
-         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)]</span>
-
-    <span class="n">parts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">oee</span><span class="p">(</span><span class="n">the_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">expected_values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
-         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_neighborhoods</span><span class="p">)]</span>
-          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)])</span>
-
-    <span class="n">test_statistic</span> <span class="o">=</span> <span class="n">parts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">test_statistic</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">get_test_statistic</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>0.0044994022598769338
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># wow thats almost 0 but hmm.. the probability value for a chi-square distribution of k=6 ,</span>
-<span class="c1"># for x=0.004499 is pretty small.. </span>
-<span class="c1"># hmmm..</span>
-</pre></div>                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
+<div class="highlight"><pre><span></span><span class="c1"># lets …</span></pre></div>
+                <a class="readmore" href="../doing-the-wikipedia-chi-square-example.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
 
             <li><article class="hentry">
                 <header>
