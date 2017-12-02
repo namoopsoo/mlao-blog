@@ -14,13 +14,42 @@
         <header id="banner" class="body">
                 <h1><a href="../">Notes on Machine Learning and Other </a></h1>
                 <nav><ul>
+                    <li><a href="../category/cycling.html">cycling</a></li>
                     <li><a href="../category/misc.html">misc</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">Stacked area chart, using pandas dataframe and groupby date</a></h1>
+                    <h1 class="entry-title"><a href="../spoke_crackings.html">Spokes cracked</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2017-12-01T12:00:01-05:00">
+                Published: Fri 01 December 2017
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="../category/cycling.html">cycling</a>.</p>
+
+</footer><!-- /.post-info --><p>Darn, I was riding for at least one to two days thinking, why am I riding much slower? Last night I finally noticed that wow my rear wheel is really wobbly and rubbing up against the breaks quite a bit lately. This morning I finally started setting up to true the wheel. I marked the spoke which looked like adjusting it would have the highest impact. And wow I didnt notice it completely sheared off.</p>
+<p><img alt="broken spoke" src="https://s3.amazonaws.com/my-blog-content/2017-12-01+09.58.25.jpg"width="100%" ></p>
+<p>It took me just around 20 minutes or so to adjust. </p>
+<p><img alt="fixed spoke" src="https://s3.amazonaws.com/my-blog-content/2017-12-01+10.03.05.jpg"  width="100%"></p>
+<p>The wobble was not completely gone, but it was dramatically reduced. I don't have a truing stand, but that would be a cool way to measure the warp.</p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html" rel="bookmark"
+                           title="Permalink to Stacked area chart, using pandas dataframe and groupby date">Stacked area chart, using pandas dataframe and groupby date</a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-11-29T17:00:01-05:00">
                 Published: Wed 29 November 2017
@@ -31,7 +60,7 @@
         </address>
 <p>In <a href="../category/misc.html">misc</a>.</p>
 
-</footer><!-- /.post-info --><ul>
+</footer><!-- /.post-info -->                <ul>
 <li>the pandas part... will present this part later...</li>
 </ul>
 <div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>  <span class="c1"># 7</span>
@@ -43,81 +72,10 @@
 
 
 <span class="k">def</span> <span class="nf">aggreg_proportions_by_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Apply func used to help dedupe log data &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">num_rows</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">num_rows</span><span class="p">}</span>
-
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pushups&#39;</span><span class="p">,</span> 
-                        <span class="s1">&#39;crunches&#39;</span><span class="p">,</span> <span class="p">]:</span>
-            <span class="n">foo_dict</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
-            <span class="n">num_True</span> <span class="o">=</span> <span class="n">foo_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">new_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-                        <span class="n">key</span><span class="p">:</span> <span class="n">num_True</span><span class="p">,</span>
-                        <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;Proportion&#39;</span><span class="p">:</span> <span class="n">num_True</span><span class="o">/</span><span class="n">num_rows</span><span class="p">}),</span>
-        <span class="n">new_row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new_row</span>
-
-<span class="n">proportions_by_date_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-        <span class="n">by</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">aggreg_proportions_by_row</span><span class="p">)</span>
-
-<span class="n">proportion_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;crunchesProportion&#39;</span><span class="p">,</span>
-<span class="s1">&#39;pushupsProportion&#39;</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">make_xtick_labels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Given x, step the labels every &lt;step&gt;</span>
-<span class="sd">    Aka, take every &lt;step&gt;th x label</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">x_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>  <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">x_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x_ticks</span><span class="p">]</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;x_ticks&#39;</span><span class="p">:</span> <span class="n">x_ticks</span><span class="p">,</span> <span class="s1">&#39;x_labels&#39;</span><span class="p">:</span> <span class="n">x_labels</span><span class="p">}</span>
-
-<span class="c1"># Make data ready for output...</span>
-<span class="n">x_labels</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_labels</span><span class="p">))</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="p">[</span><span class="n">proportion_keys</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-<span class="n">y_list</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">proportion_keys</span><span class="p">}</span>
-<span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">make_xtick_labels</span><span class="p">(</span><span class="n">x_labels</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-
-<span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
-    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fd</span><span class="p">)</span>
-</pre></div>
-
-
-<ul>
-<li>jupyter...</li>
-</ul>
-<div class="highlight"><pre><span></span>fn = &#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;
-with open(fn) as fd:
-    data = json.load(fd)
-x = data[&#39;x&#39;]
-x_labels = data[&#39;x_labels&#39;]
-x_ticks = data[&#39;x_ticks&#39;]
-y = data[&#39;y&#39;]
-labels = data[&#39;labels&#39;]
-
-# Plot
-plt.stackplot(x, y, labels=labels)
-plt.legend(loc=&#39;upper left&#39;)
-
-# use the plt.xticks function to custom labels
-plt.xticks(x_ticks, x_labels, rotation=45, fontweight=&#39;bold&#39;, fontsize=&#39;10&#39;, horizontalalignment=&#39;right&#39;)
-</pre></div>
-
-
-<ul>
-<li>==&gt;
-<a href="33415651-e1488734-d565-11e7-88cb-6eeb67574c43.png">image</a></li>
-<li>In the above, used https://stackoverflow.com/a/12608937 , to finally understand how to "step" the tick marks of x axis</li>
-</ul>                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
+    <span class="sd">&#39;&#39;&#39;Apply func used …</span></pre></div>
+                <a class="readmore" href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
 
             <li><article class="hentry">
                 <header>
