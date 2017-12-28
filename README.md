@@ -32,6 +32,11 @@ python -m pelican.server
 #### or all together...
 ```
 pelican content -o output -s pelicanconf.py
+
+# (likely have to copy any local images from content/ to output/ as well)
+
+# edit `./output/theme/css/main.css` , inserting the extra line shown below.
+
 ghp-import output
 git push origin gh-pages
 ```
