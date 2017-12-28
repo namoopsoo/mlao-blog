@@ -22,7 +22,353 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">Stacked area chart, using pandas dataframe and groupby date</a></h1>
+                    <h1 class="entry-title"><a href="../what-does-sampling-do-to-a-rate.html">What does sampling do to a rate</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2017-12-28T15:00:01-05:00">
+                Published: Thu 28 December 2017
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="../category/pandas.html">pandas</a>.</p>
+<p>tags: <a href="../tag/sampling.html">sampling</a> <a href="../tag/probability.html">probability</a> <a href="../tag/visualization.html">visualization</a> <a href="../tag/pandas.html">pandas</a> </p>
+</footer><!-- /.post-info --><h3>Notes</h3>
+<p>if we have error T,F, in a population of Sentry data. but we have the roughly 10% sampled output. And observe an error rate, what is the probability range for this error rate? </p>
+<p>(side context is that these are "address validation" sentry logs. and my "error rate" here is the address output being empty [] ). Otherwise it is the (1 - pass rate) basically. </p>
+<p>This would be cool to do some example code around, w/ trials. </p>
+<h3>trials</h3>
+<p>There are a few ways to think about this. Sampling feels like removing items from a bag and throwing out 90% of them, but at random, for example.</p>
+<p>For a simpler scenario, let's first use the Python <code>random</code> library to see what sampling does to the <em>True Rate</em>.</p>
+<h4>Setup</h4>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="n">n_experiments</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="n">n_trials</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="k">def</span> <span class="nf">run_an_experiment</span><span class="p">(</span><span class="n">n_trials</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Run an experiment, for n trials,</span>
+
+<span class="sd">    With sampling probability, use a trial result</span>
+<span class="sd">    for the tabulation, otherwise, ignore it</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_trials</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+            <span class="c1"># True rate</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
+                <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;sampled_true&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">counts</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_experiments</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">run_an_experiment</span><span class="p">(</span><span class="n">n_trials</span><span class="p">)</span>
+        <span class="n">experiments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">dfraw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dfraw</span>
+</pre></div>
+
+
+<ul>
+<li>running this...</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">experiment</span>
+
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">results</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="mi">100</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">results</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> 
+<span class="p">[{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">210</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">840</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">199</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">821</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">170</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">775</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">186</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">840</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">214</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">784</span><span class="p">}]</span>
+</pre></div>
+
+
+<ul>
+<li>Okay. that was instantaneous and output looks normal. Let's get more trials in there... ( Changed from <code>100</code> to <code>100,000</code> trials...</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="o">%</span><span class="n">time</span> <span class="n">results2</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+<span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">18</span><span class="n">s</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">171</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">19</span><span class="n">s</span>
+<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">19</span><span class="n">s</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results2</span><span class="p">)</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="mi">100000</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">15</span><span class="p">]:</span> <span class="n">dfraw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">results2</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">19</span><span class="p">]:</span>     <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;sampleTrueRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_true</span> <span class="o">/</span> <span class="p">(</span><span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_true</span> <span class="o">+</span>
+    <span class="o">...</span><span class="p">:</span>  <span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_false</span><span class="p">)</span>
+    <span class="o">...</span><span class="p">:</span> 
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">20</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">20</span><span class="p">]:</span> 
+   <span class="n">sampled_false</span>  <span class="n">sampled_true</span>  <span class="n">sampleTrueRate</span>
+<span class="mi">0</span>            <span class="mi">194</span>           <span class="mi">754</span>        <span class="mf">0.795359</span>
+<span class="mi">1</span>            <span class="mi">212</span>           <span class="mi">795</span>        <span class="mf">0.789474</span>
+<span class="mi">2</span>            <span class="mi">200</span>           <span class="mi">780</span>        <span class="mf">0.795918</span>
+<span class="mi">3</span>            <span class="mi">194</span>           <span class="mi">822</span>        <span class="mf">0.809055</span>
+<span class="mi">4</span>            <span class="mi">201</span>           <span class="mi">774</span>        <span class="mf">0.793846</span>
+</pre></div>
+
+
+<ul>
+<li>now lets bin this sample true rate , using the nearest hundredth.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">26</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampleTrueRate</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">de</span>
+    <span class="o">...</span><span class="p">:</span> <span class="n">cimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.01&#39;</span><span class="p">)))</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">26</span><span class="p">]:</span> 
+<span class="mi">0</span>    <span class="mf">0.80</span>
+<span class="mi">1</span>    <span class="mf">0.79</span>
+<span class="mi">2</span>    <span class="mf">0.80</span>
+<span class="mi">3</span>    <span class="mf">0.81</span>
+<span class="mi">4</span>    <span class="mf">0.79</span>
+<span class="n">Name</span><span class="p">:</span> <span class="n">sampleTrueRate</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">27</span><span class="p">]:</span> <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampleTrueRate</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">deci</span>
+    <span class="o">...</span><span class="p">:</span> <span class="n">mal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.01&#39;</span><span class="p">)))</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">30</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">30</span><span class="p">]:</span> 
+   <span class="n">sampled_false</span>  <span class="n">sampled_true</span>  <span class="n">sampleTrueRate</span> <span class="n">sampleTrueRateRounded</span>
+<span class="mi">0</span>            <span class="mi">194</span>           <span class="mi">754</span>        <span class="mf">0.795359</span>                  <span class="mf">0.80</span>
+<span class="mi">1</span>            <span class="mi">212</span>           <span class="mi">795</span>        <span class="mf">0.789474</span>                  <span class="mf">0.79</span>
+<span class="mi">2</span>            <span class="mi">200</span>           <span class="mi">780</span>        <span class="mf">0.795918</span>                  <span class="mf">0.80</span>
+<span class="mi">3</span>            <span class="mi">194</span>           <span class="mi">822</span>        <span class="mf">0.809055</span>                  <span class="mf">0.81</span>
+<span class="mi">4</span>            <span class="mi">201</span>           <span class="mi">774</span>        <span class="mf">0.793846</span>                  <span class="mf">0.79</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">32</span><span class="p">]:</span> <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dfraw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">36</span><span class="p">]:</span> <span class="n">gpby</span> <span class="o">=</span> <span class="n">dfraw</span><span class="p">[[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">,</span> <span class="s1">&#39;unit&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;sampleTrueRa</span>
+    <span class="o">...</span><span class="p">:</span> <span class="n">teRounded</span><span class="s1">&#39;)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">37</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">39</span><span class="p">]:</span> <span class="n">bindf</span> <span class="o">=</span> <span class="n">gpby</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">40</span><span class="p">]:</span> <span class="n">bindf</span><span class="o">.</span><span class="n">shape</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">40</span><span class="p">]:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">41</span><span class="p">]:</span> <span class="n">bindf</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">41</span><span class="p">]:</span> 
+                        <span class="n">unit</span>
+<span class="n">sampleTrueRateRounded</span>       
+<span class="mf">0.74</span>                       <span class="mi">1</span>
+<span class="mf">0.75</span>                      <span class="mi">22</span>
+<span class="mf">0.76</span>                     <span class="mi">311</span>
+<span class="mf">0.77</span>                    <span class="mi">2228</span>
+<span class="mf">0.78</span>                    <span class="mi">9327</span>
+<span class="mf">0.79</span>                   <span class="mi">22550</span>
+<span class="mf">0.80</span>                   <span class="mi">30571</span>
+<span class="mf">0.81</span>                   <span class="mi">23367</span>
+<span class="mf">0.82</span>                    <span class="mi">9352</span>
+<span class="mf">0.83</span>                    <span class="mi">2040</span>
+<span class="mf">0.84</span>                     <span class="mi">217</span>
+<span class="mf">0.85</span>                      <span class="mi">14</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">42</span><span class="p">]:</span> <span class="n">bindf</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">42</span><span class="p">]:</span> 
+<span class="n">unit</span>    <span class="mi">100000</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="n">int64</span>
+</pre></div>
+
+
+<ul>
+<li>Just looking at this, we see that we don't have <code>100%</code> of the trials on <code>(0.79,0.81)</code>, but it is a lot there.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">45</span><span class="p">]:</span> <span class="n">newdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">bindf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">46</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bindf</span><span class="o">.</span><span class="n">index</span>
+
+
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">53</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bindf</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">values</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">55</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;RelativeFrequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newdf</span><span class="o">.</span><span class="n">Frequency</span><span class="o">/</span><span class="mi">100000</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">56</span><span class="p">]:</span> <span class="n">newdf</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">56</span><span class="p">]:</span> 
+   <span class="n">sampleTrueRateRounded</span>  <span class="n">Frequency</span>  <span class="n">RelativeFrequency</span>
+<span class="mi">0</span>                   <span class="mf">0.74</span>          <span class="mi">1</span>            <span class="mf">0.00001</span>
+<span class="mi">1</span>                   <span class="mf">0.75</span>         <span class="mi">22</span>            <span class="mf">0.00022</span>
+<span class="mi">2</span>                   <span class="mf">0.76</span>        <span class="mi">311</span>            <span class="mf">0.00311</span>
+<span class="mi">3</span>                   <span class="mf">0.77</span>       <span class="mi">2228</span>            <span class="mf">0.02228</span>
+<span class="mi">4</span>                   <span class="mf">0.78</span>       <span class="mi">9327</span>            <span class="mf">0.09327</span>
+<span class="mi">5</span>                   <span class="mf">0.79</span>      <span class="mi">22550</span>            <span class="mf">0.22550</span>
+<span class="mi">6</span>                   <span class="mf">0.80</span>      <span class="mi">30571</span>            <span class="mf">0.30571</span>
+<span class="mi">7</span>                   <span class="mf">0.81</span>      <span class="mi">23367</span>            <span class="mf">0.23367</span>
+<span class="mi">8</span>                   <span class="mf">0.82</span>       <span class="mi">9352</span>            <span class="mf">0.09352</span>
+<span class="mi">9</span>                   <span class="mf">0.83</span>       <span class="mi">2040</span>            <span class="mf">0.02040</span>
+<span class="mi">10</span>                  <span class="mf">0.84</span>        <span class="mi">217</span>            <span class="mf">0.00217</span>
+<span class="mi">11</span>                  <span class="mf">0.85</span>         <span class="mi">14</span>            <span class="mf">0.00014</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">57</span><span class="p">]:</span> <span class="n">newdf</span><span class="o">.</span><span class="n">RelativeFrequency</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">57</span><span class="p">]:</span> <span class="mf">1.0</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">59</span><span class="p">]:</span> <span class="n">newdf</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;/blahblah/repo/sample-probabili</span>
+    <span class="o">...</span><span class="p">:</span> <span class="n">ty</span><span class="o">-</span><span class="n">experiment</span><span class="o">-</span><span class="mi">2017</span><span class="o">-</span><span class="mi">12</span><span class="o">/</span><span class="n">experiment</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">binned</span><span class="o">.</span><span class="n">csv</span><span class="s1">&#39;, index=False)</span>
+</pre></div>
+
+
+<h4>Meanwhile in jupyter...</h4>
+<div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>/usr/local/miniconda3/envs/blogplt/lib/python3.6/site-packages/matplotlib/font_manager.py:281: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  &#39;Matplotlib is building the font cache using fc-list. &#39;
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/LeDropbox/Dropbox/Code/repo/sample-probability-experiment-2017-12/experiment-2-binned.csv&#39;</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">binned_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+<span class="n">binned_df</span>
+</pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>sampleTrueRateRounded</th>
+      <th>Frequency</th>
+      <th>RelativeFrequency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.74</td>
+      <td>1</td>
+      <td>0.00001</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.75</td>
+      <td>22</td>
+      <td>0.00022</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.76</td>
+      <td>311</td>
+      <td>0.00311</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.77</td>
+      <td>2228</td>
+      <td>0.02228</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.78</td>
+      <td>9327</td>
+      <td>0.09327</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.79</td>
+      <td>22550</td>
+      <td>0.22550</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.80</td>
+      <td>30571</td>
+      <td>0.30571</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.81</td>
+      <td>23367</td>
+      <td>0.23367</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.82</td>
+      <td>9352</td>
+      <td>0.09352</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.83</td>
+      <td>2040</td>
+      <td>0.02040</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.84</td>
+      <td>217</td>
+      <td>0.00217</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.85</td>
+      <td>14</td>
+      <td>0.00014</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;sampleTrueRateRounded&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;RelativeFrequency&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">binned_df</span><span class="p">,</span> 
+                 <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Blues_d&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="png" src="output_3_0.png"></p>
+<h3>Side notes</h3>
+<p>If we have a proportion of p = P(T) = 0.10 and q = P(F) = 0.9 , and we choose 10% (aka sampling rate),  this is basically like a  (10000C1000)(p^x)(q^y) for example if n=10,000. And that is for a specific value of x + y = 1000 being chosen.</p>
+<p>so yea, sampling is binomial distribution.</p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html" rel="bookmark"
+                           title="Permalink to Stacked area chart, using pandas dataframe and groupby date">Stacked area chart, using pandas dataframe and groupby date</a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-11-29T17:00:01-05:00">
                 Published: Wed 29 November 2017
@@ -33,7 +379,7 @@
         </address>
 <p>In <a href="../category/pandas.html">pandas</a>.</p>
 <p>tags: <a href="../tag/visualization.html">visualization</a> </p>
-</footer><!-- /.post-info --><ul>
+</footer><!-- /.post-info -->                <ul>
 <li>the pandas part... will present this part later...</li>
 </ul>
 <div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>  <span class="c1"># 7</span>
@@ -45,77 +391,12 @@
 
 
 <span class="k">def</span> <span class="nf">aggreg_proportions_by_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Apply func used to help dedupe log data &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">num_rows</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">new_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">num_rows</span><span class="p">}</span>
-
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pushups&#39;</span><span class="p">,</span> 
-                        <span class="s1">&#39;crunches&#39;</span><span class="p">,</span> <span class="p">]:</span>
-            <span class="n">foo_dict</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
-            <span class="n">num_True</span> <span class="o">=</span> <span class="n">foo_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">new_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-                        <span class="n">key</span><span class="p">:</span> <span class="n">num_True</span><span class="p">,</span>
-                        <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;Proportion&#39;</span><span class="p">:</span> <span class="n">num_True</span><span class="o">/</span><span class="n">num_rows</span><span class="p">}),</span>
-        <span class="n">new_row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">new_dict</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new_row</span>
-
-<span class="n">proportions_by_date_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-        <span class="n">by</span><span class="o">=</span><span class="s1">&#39;date&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">aggreg_proportions_by_row</span><span class="p">)</span>
-
-<span class="n">proportion_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;crunchesProportion&#39;</span><span class="p">,</span>
-<span class="s1">&#39;pushupsProportion&#39;</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">make_xtick_labels</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Given x, step the labels every &lt;step&gt;</span>
-<span class="sd">    Aka, take every &lt;step&gt;th x label</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">x_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>  <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">x_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x_ticks</span><span class="p">]</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;x_ticks&#39;</span><span class="p">:</span> <span class="n">x_ticks</span><span class="p">,</span> <span class="s1">&#39;x_labels&#39;</span><span class="p">:</span> <span class="n">x_labels</span><span class="p">}</span>
-
-<span class="c1"># Make data ready for output...</span>
-<span class="n">x_labels</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_labels</span><span class="p">))</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">proportions_by_date_df</span><span class="p">[</span><span class="n">proportion_keys</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
-<span class="n">y_list</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-<span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">proportion_keys</span><span class="p">}</span>
-<span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">make_xtick_labels</span><span class="p">(</span><span class="n">x_labels</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-
-<span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
-    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fd</span><span class="p">)</span>
-</pre></div>
-
-
-<ul>
-<li>jupyter...</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/Downloads/2017-11-30-blah-data.json&#39;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
-<span class="n">x_labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;x_labels&#39;</span><span class="p">]</span>
-<span class="n">x_ticks</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;x_ticks&#39;</span><span class="p">]</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span>
-
-<span class="c1"># Plot</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
-
-<span class="c1"># use the plt.xticks function to custom labels</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">x_ticks</span><span class="p">,</span> <span class="n">x_labels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
-</pre></div>
-
-
-<ul>
-<li>==&gt;
-<img alt="image" src="https://s3.amazonaws.com/my-blog-content/33415651-e1488734-d565-11e7-88cb-6eeb67574c43.png"></li>
-<li>In the above, used https://stackoverflow.com/a/12608937 , to finally understand how to "step" the tick marks of x axis</li>
-</ul>                </article>
-            </aside><!-- /#featured -->
+    <span class="sd">&#39;&#39;&#39;Apply func used …</span></pre></div>
+                <a class="readmore" href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+                </ol><!-- /#posts-list -->
+                </section><!-- /#content -->
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>

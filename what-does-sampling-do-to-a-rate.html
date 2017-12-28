@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
         <meta charset="utf-8" />
-        <title>Notes on Machine Learning and Other - Michal Piekarczyk</title>
-        <link rel="stylesheet" href="../theme/css/main.css" />
+        <title>What does sampling do to a rate</title>
+        <link rel="stylesheet" href="./theme/css/main.css" />
 
         <!--[if IE]>
             <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -12,28 +12,33 @@
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="../">Notes on Machine Learning and Other </a></h1>
+                <h1><a href="./">Notes on Machine Learning and Other </a></h1>
                 <nav><ul>
-                    <li><a href="../category/cycling.html">cycling</a></li>
-                    <li><a href="../category/misc.html">misc</a></li>
-                    <li><a href="../category/pandas.html">pandas</a></li>
+                    <li><a href="./category/cycling.html">cycling</a></li>
+                    <li><a href="./category/misc.html">misc</a></li>
+                    <li class="active"><a href="./category/pandas.html">pandas</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="./what-does-sampling-do-to-a-rate.html" rel="bookmark"
+           title="Permalink to What does sampling do to a rate">What does sampling do to a rate</a></h1>
+    </header>
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="../what-does-sampling-do-to-a-rate.html">What does sampling do to a rate</a></h1>
+    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-12-28T15:00:01-05:00">
                 Published: Thu 28 December 2017
         </abbr>
 
         <address class="vcard author">
-                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
+                By                         <a class="url fn" href="./author/michal-piekarczyk.html">Michal Piekarczyk</a>
         </address>
-<p>In <a href="../category/pandas.html">pandas</a>.</p>
-<p>tags: <a href="../tag/sampling.html">sampling</a> <a href="../tag/probability.html">probability</a> <a href="../tag/visualization.html">visualization</a> <a href="../tag/pandas.html">pandas</a> </p>
-</footer><!-- /.post-info --><h3>Notes</h3>
+<p>In <a href="./category/pandas.html">pandas</a>.</p>
+<p>tags: <a href="./tag/sampling.html">sampling</a> <a href="./tag/probability.html">probability</a> <a href="./tag/visualization.html">visualization</a> <a href="./tag/pandas.html">pandas</a> </p>
+</footer><!-- /.post-info -->      <h3>Notes</h3>
 <p>if we have error T,F, in a population of Sentry data. but we have the roughly 10% sampled output. And observe an error rate, what is the probability range for this error rate? </p>
 <p>(side context is that these are "address validation" sentry logs. and my "error rate" here is the address output being empty [] ). Otherwise it is the (1 - pass rate) basically. </p>
 <p>This would be cool to do some example code around, w/ trials. </p>
@@ -355,127 +360,11 @@
 <p><img alt="png" src="output_3_0.png"></p>
 <h3>Side notes</h3>
 <p>If we have a proportion of p = P(T) = 0.10 and q = P(F) = 0.9 , and we choose 10% (aka sampling rate),  this is basically like a  (10000C1000)(p^x)(q^y) for example if n=10,000. And that is for a specific value of x + y = 1000 being chosen.</p>
-<p>so yea, sampling is binomial distribution.</p>                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
+<p>so yea, sampling is binomial distribution.</p>
+    </div><!-- /.entry-content -->
 
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="../spoke_crackings.html" rel="bookmark"
-                           title="Permalink to Spokes cracked">Spokes cracked</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2017-12-01T12:00:01-05:00">
-                Published: Fri 01 December 2017
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
-        </address>
-<p>In <a href="../category/cycling.html">cycling</a>.</p>
-
-</footer><!-- /.post-info -->                <p>Darn, I was riding for at least one to two days thinking, why am I riding much slower? Last night I finally noticed that wow my rear wheel is really wobbly and rubbing up against the breaks quite a bit lately. This morning I finally started setting up to true …</p>
-                <a class="readmore" href="../spoke_crackings.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html" rel="bookmark"
-                           title="Permalink to Stacked area chart, using pandas dataframe and groupby date">Stacked area chart, using pandas dataframe and groupby date</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2017-11-29T17:00:01-05:00">
-                Published: Wed 29 November 2017
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
-        </address>
-<p>In <a href="../category/pandas.html">pandas</a>.</p>
-<p>tags: <a href="../tag/visualization.html">visualization</a> </p>
-</footer><!-- /.post-info -->                <ul>
-<li>the pandas part... will present this part later...</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>  <span class="c1"># 7</span>
-<span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span>
-<span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2017-11-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-04&#39;</span><span class="p">,</span> <span class="s1">&#39;2017-11-04&#39;</span><span class="p">,</span> <span class="p">],</span>
-<span class="s1">&#39;pushups&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
-<span class="s1">&#39;crunches&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">],</span>
-<span class="p">})</span>
-
-
-<span class="k">def</span> <span class="nf">aggreg_proportions_by_row</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Apply func used …</span></pre></div>
-                <a class="readmore" href="../stacked-area-chart-using-pandas-dataframe-and-groupby-date.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="../doing-the-wikipedia-chi-square-example.html" rel="bookmark"
-                           title="Permalink to Doing the wikipedia chi square example">Doing the wikipedia chi square example</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2017-11-26T12:00:01-05:00">
-                Published: Sun 26 November 2017
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
-        </address>
-<p>In <a href="../category/misc.html">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p>The simple goal here is to take the example in https://en.wikipedia.org/wiki/Chi-squared_test#Example_chi-squared_test_for_categorical_data and finish calculating the test statistic. It looks like at the time of this writing that was left as an exercise for the reader.</p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="c1"># lets …</span></pre></div>
-                <a class="readmore" href="../doing-the-wikipedia-chi-square-example.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="../backing-up-macbook-2011-ssd.html" rel="bookmark"
-                           title="Permalink to Backing up Macbook 2011 SSD">Backing up Macbook 2011 SSD</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2017-08-13T12:16:01-05:00">
-                Published: Sun 13 August 2017
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
-        </address>
-<p>In <a href="../category/misc.html">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <h3>2011 macbook air</h3>
-<ul>
-<li>Looks like pinout on the SSD is 12 + 6 pins.</li>
-<li>But a macbook air to SATA converter I had gotten earlier was for a 18 + 8 pin layout. It is labeled as the "Ver 2.0" ![adapter]({{ site.url }}/converter-2012.jpg) for macbook 2012.</li>
-<li>So I need …</li></ul>
-                <a class="readmore" href="../backing-up-macbook-2011-ssd.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-                </ol><!-- /#posts-list -->
-                </section><!-- /#content -->
+  </article>
+</section>
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>
