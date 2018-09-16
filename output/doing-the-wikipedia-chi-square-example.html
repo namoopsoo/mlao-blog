@@ -3,7 +3,7 @@
 <head>
         <meta charset="utf-8" />
         <title>Doing the wikipedia chi square example</title>
-        <link rel="stylesheet" href="/theme/css/main.css" />
+        <link rel="stylesheet" href="./theme/css/main.css" />
 
         <!--[if IE]>
             <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -12,16 +12,18 @@
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="/">Notes on Machine Learning and Other </a></h1>
+                <h1><a href="./">Notes on Machine Learning and Other </a></h1>
                 <nav><ul>
-                    <li class="active"><a href="/category/misc.html">misc</a></li>
+                    <li><a href="./category/cycling.html">cycling</a></li>
+                    <li class="active"><a href="./category/misc.html">misc</a></li>
+                    <li><a href="./category/pandas.html">pandas</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
 <section id="content" class="body">
   <article>
     <header>
       <h1 class="entry-title">
-        <a href="/doing-the-wikipedia-chi-square-example.html" rel="bookmark"
+        <a href="./doing-the-wikipedia-chi-square-example.html" rel="bookmark"
            title="Permalink to Doing the wikipedia chi square example">Doing the wikipedia chi square example</a></h1>
     </header>
 
@@ -32,9 +34,9 @@
         </abbr>
 
         <address class="vcard author">
-                By                         <a class="url fn" href="/author/michal-piekarczyk.html">Michal Piekarczyk</a>
+                By                         <a class="url fn" href="./author/michal-piekarczyk.html">Michal Piekarczyk</a>
         </address>
-<p>In <a href="/category/misc.html">misc</a>.</p>
+<p>In <a href="./category/misc.html">misc</a>.</p>
 
 </footer><!-- /.post-info -->      <p>The simple goal here is to take the example in https://en.wikipedia.org/wiki/Chi-squared_test#Example_chi-squared_test_for_categorical_data and finish calculating the test statistic. It looks like at the time of this writing that was left as an exercise for the reader.</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>

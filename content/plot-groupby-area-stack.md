@@ -2,6 +2,8 @@
 layout: post
 title: Stacked area chart, using pandas dataframe and groupby date
 date:   2017-11-29 17:00:01 -0500
+category: pandas
+tags: visualization
 ---
 
 * the pandas part... will present this part later...
@@ -58,7 +60,7 @@ with open(fn, 'w') as fd:
     json.dump(data, fd)
 ```
 * jupyter...
-```
+```python
 fn = '/Users/michal/Downloads/2017-11-30-blah-data.json'
 with open(fn) as fd:
     data = json.load(fd)
@@ -76,7 +78,7 @@ plt.legend(loc='upper left')
 plt.xticks(x_ticks, x_labels, rotation=45, fontweight='bold', fontsize='10', horizontalalignment='right')
 ```
 * ==>
-[image](33415651-e1488734-d565-11e7-88cb-6eeb67574c43.png)
+![image](https://s3.amazonaws.com/my-blog-content/33415651-e1488734-d565-11e7-88cb-6eeb67574c43.png)
 * In the above, used https://stackoverflow.com/a/12608937 , to finally understand how to "step" the tick marks of x axis
 
 

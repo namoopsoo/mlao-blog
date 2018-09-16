@@ -263,6 +263,9 @@ img.left, figure.left {float: left; margin: 0 2em 2em 0;}
 	-webkit-border-radius: 10px;
 }
 
+/* update image width*/
+img {width: 100%; }
+
 /*
 	Extras
 *****************/
