@@ -1,6 +1,10 @@
+#### pre-requisites
 
+```
+pip install pelican markdown ghp-import
+```
 
-
+#### updating http://namoopsoo.github.com/mlao-blog 
 
 * Add/Edit files.
 * Put images into s3.
