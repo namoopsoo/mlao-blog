@@ -17,12 +17,384 @@
                     <li><a href="../category/cycling.html">cycling</a></li>
                     <li><a href="../category/misc.html">misc</a></li>
                     <li><a href="../category/pandas.html">pandas</a></li>
+                    <li><a href="../category/probability.html">probability</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="../what-does-sampling-do-to-a-rate.html">What does sampling do to a rate</a></h1>
+                    <h1 class="entry-title"><a href="../sample_probability_20180916.html">Sample Probability Calculations</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2018-09-16T12:00:01-05:00">
+                Published: Sun 16 September 2018
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="../author/michal-piekarczyk.html">Michal Piekarczyk</a>
+        </address>
+<p>In <a href="../category/probability.html">probability</a>.</p>
+
+</footer><!-- /.post-info --><div class="highlight"><pre><span></span><span class="c1"># This notebook tries to calculate a quantity presented in the video,</span>
+<span class="c1"># https://www.youtube.com/watch?v=hlM7zdf7zwU&amp;feature=share , </span>
+<span class="c1"># &quot;Confidence intervals and margin of error | AP Statistics | Khan Academy&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># Given a population of size M, </span>
+<span class="c1"># and if the population is split into Group A of size Q,</span>
+<span class="c1"># and Group B makes up , M - Q,</span>
+<span class="c1"># , such that p = Q/M</span>
+<span class="c1"># and if we try to sample with a sample size of n,</span>
+<span class="c1">#</span>
+<span class="c1"># , what is the probability, using a sample distribution around p, </span>
+<span class="c1"># with sample_sigma = sqrt((p)*(1 - p)/n)</span>
+<span class="c1"># , that for the sample, the sample proportion observed of group  A, will be, </span>
+<span class="c1"># within 2 sample_sigma, of p ?</span>
+<span class="c1">#</span>
+<span class="c1"># The general approach here is , initially, to try to use combinatorial math,</span>
+<span class="c1"># to count how many ways are there of selecting different proportions, in a sample,</span>
+<span class="c1"># from Group A and Group B.</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">comb</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ipdb</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span> <span class="c1"># too big !</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">46402</span><span class="p">}</span>
+
+<span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">4640</span><span class="p">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_sample_sigma</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span><span class="o">/</span><span class="n">n</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">get_sample_sigma</span><span class="p">(</span><span class="mi">9</span><span class="o">/</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>0.15732132722552272
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">get_sample_sigma</span><span class="p">(</span><span class="mi">4640</span><span class="o">/</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>0.04987023160162784
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1">## For an arbitrary range, (p - 2*sigma_sample_p , p + 2*sigma_sample_p)</span>
+<span class="c1"># </span>
+<span class="n">sigma_sample_p</span> <span class="o">=</span> <span class="n">get_sample_sigma</span><span class="p">(</span><span class="mi">4640</span><span class="o">/</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">Q</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">];</span> <span class="n">M</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">];</span> <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="o">/</span><span class="n">M</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+<span class="k">print</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="o">*</span><span class="n">n</span>
+<span class="k">print</span> <span class="n">Q</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">Q</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="o">*</span><span class="n">n</span>
+<span class="k">print</span> <span class="n">p</span><span class="o">*</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="o">*</span><span class="n">n</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>0.464 46.4
+4630.02595368 4649.97404632
+36.4259536797 56.3740463203
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_2sigma_Q_range</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="o">/</span><span class="n">M</span> <span class="p">;</span> <span class="k">assert</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span>
+
+    <span class="n">sigma_sample_p</span> <span class="o">=</span> <span class="n">get_sample_sigma</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">range1</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="p">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">sigma_sample_p</span><span class="p">]</span>
+    <span class="n">range2</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">n</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">range1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;range1&#39;</span><span class="p">:</span> <span class="n">range1</span><span class="p">,</span> <span class="s1">&#39;range2&#39;</span><span class="p">:</span> <span class="n">range2</span><span class="p">}</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[36, 56]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_probability_that_sample_prob_is_in_range</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">some_range</span><span class="p">,</span> <span class="p">):</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="o">/</span><span class="n">M</span> <span class="p">;</span> <span class="k">assert</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">get_sample_sigma</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">some_range</span>
+
+
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">comb</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+        <span class="n">comb</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">comb</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">numerator</span><span class="o">/</span><span class="n">denominator</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">some_range</span> <span class="o">=</span> <span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">some_range</span>
+<span class="k">print</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span>
+<span class="c1"># prob = ipdb.runcall(calculate_probability_that_sample_prob_is_in_range,               </span>
+<span class="c1">#                    parameters, some_range)</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">calculate_probability_that_sample_prob_is_in_range</span><span class="p">(</span>
+                    <span class="n">parameters</span><span class="p">,</span> <span class="n">some_range</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">prob</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>36 56
+6775154660566004.0
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Hmm. Solve on super small scale first , </span>
+<span class="k">print</span> <span class="s2">&quot;comb(20,10) = &quot;</span><span class="p">,</span> <span class="n">comb</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">smallparams</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span><span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">}</span>
+<span class="k">print</span> <span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">smallparams</span><span class="p">)</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>comb(20,10) =  184756.0
+{&#39;range2&#39;: [1, 7], &#39;range1&#39;: [0.13535734554895457, 0.7646426544510454]}
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># is my numerator right in counting the sampling ways?</span>
+<span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">comb</span><span class="p">(</span><span class="mi">20</span><span class="o">-</span><span class="n">i</span><span class="p">,</span><span class="mi">10</span><span class="o">-</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">comb</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>5707449.0
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Dang that doesn&#39;t look right at all, 5707449.0 &gt;&gt; 184756.0 </span>
+<span class="c1"># hmm, </span>
+<span class="p">[[</span><span class="n">i</span><span class="p">,(</span><span class="mi">20</span><span class="o">-</span><span class="n">i</span><span class="p">,</span><span class="mi">10</span><span class="o">-</span><span class="n">i</span><span class="p">),(</span><span class="mi">9</span><span class="p">,</span><span class="n">i</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>[[0, (20, 10), (9, 0)],
+ [1, (19, 9), (9, 1)],
+ [2, (18, 8), (9, 2)],
+ [3, (17, 7), (9, 3)],
+ [4, (16, 6), (9, 4)],
+ [5, (15, 5), (9, 5)],
+ [6, (14, 4), (9, 6)],
+ [7, (13, 3), (9, 7)],
+ [8, (12, 2), (9, 8)],
+ [9, (11, 1), (9, 9)]]
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Hm okay, my denominator was probably wrong all along... 🤔</span>
+<span class="c1"># ok... try a different version of this function ..</span>
+
+<span class="k">def</span> <span class="nf">calculate_probability_that_sample_prob_is_in_range</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">some_range</span><span class="p">,</span> <span class="p">):</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="o">/</span><span class="n">M</span> <span class="p">;</span> <span class="k">assert</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">get_sample_sigma</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">some_range</span>
+
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">n</span>
+
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+        <span class="n">comb</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">comb</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+        <span class="n">comb</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">comb</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="k">print</span> <span class="s1">&#39;numerator/denominator = </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">numerator</span><span class="o">/</span><span class="n">denominator</span>
+
+
+<span class="c1"># def count_ways_to_choose_group_a_and_b</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">print</span> <span class="s1">&#39;small params, &#39;</span><span class="p">,</span> <span class="n">smallparams</span>
+<span class="n">sample_range_dict</span> <span class="o">=</span> <span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">smallparams</span><span class="p">)</span>
+<span class="n">sample_prob_range</span><span class="p">,</span> <span class="n">variable_range</span> <span class="o">=</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range1&#39;</span><span class="p">],</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range2&#39;</span><span class="p">]</span>
+<span class="k">print</span> <span class="s1">&#39;sample_prob_range, &#39;</span><span class="p">,</span> <span class="n">sample_prob_range</span>
+<span class="k">print</span> <span class="s1">&#39;variable_range, &#39;</span><span class="p">,</span> <span class="n">variable_range</span>
+
+<span class="n">prob</span> <span class="o">=</span> <span class="n">calculate_probability_that_sample_prob_is_in_range</span><span class="p">(</span>
+                    <span class="n">smallparams</span><span class="p">,</span> <span class="n">variable_range</span><span class="p">)</span>
+<span class="k">print</span> <span class="s1">&#39;probability that when sampling n from M, that the proportion of the sample&#39;</span>
+<span class="k">print</span> <span class="s1">&#39;probability, is within two sigma of the actual group probability&#39;</span>
+<span class="k">print</span> <span class="s1">&#39;, prob = &#39;</span><span class="p">,</span> <span class="n">prob</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>small params,  {&#39;Q&#39;: 9, &#39;M&#39;: 20, &#39;n&#39;: 10}
+sample_prob_range,  [0.13535734554895457, 0.7646426544510454]
+variable_range,  [1, 7]
+numerator/denominator = 5511792.0/5707449.0
+probability that when sampling n from M, that the proportion of the sample
+probability, is within two sigma of the actual group probability
+, prob =  0.9657190103669783
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># </span>
+<span class="c1"># Nice, finally getting a good looking number. ^^.</span>
+<span class="c1"># Maybe this result is 0.965 and not 0.95 , because my parameters are in the toyrange.</span>
+
+<span class="c1"># next, try with the large numbers again ...</span>
+<span class="n">parameters100k</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span> <span class="c1"># too big !</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">46402</span><span class="p">}</span>
+<span class="n">parameters10k</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">4640</span><span class="p">}</span>
+
+<span class="n">sample_range_dict</span> <span class="o">=</span> <span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">parameters10k</span><span class="p">)</span>
+<span class="n">sample_prob_range</span><span class="p">,</span> <span class="n">variable_range</span> <span class="o">=</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range1&#39;</span><span class="p">],</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range2&#39;</span><span class="p">]</span>
+<span class="n">range_size</span> <span class="o">=</span> <span class="n">sample_prob_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_prob_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span> <span class="s1">&#39;sample_prob_range, &#39;</span><span class="p">,</span> <span class="n">sample_prob_range</span><span class="p">,</span> <span class="s1">&#39;, size: &#39;</span><span class="p">,</span> <span class="n">range_size</span>
+<span class="k">print</span> <span class="s1">&#39;variable_range, &#39;</span><span class="p">,</span> <span class="n">variable_range</span>
+
+<span class="n">prob</span> <span class="o">=</span> <span class="n">calculate_probability_that_sample_prob_is_in_range</span><span class="p">(</span>
+                    <span class="n">parameters10k</span><span class="p">,</span> <span class="n">variable_range</span><span class="p">)</span>
+<span class="k">print</span> <span class="s1">&#39;, prob = &#39;</span><span class="p">,</span> <span class="n">prob</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>sample_prob_range,  [0.43245929613974987, 0.4955407038602502] , size:  0.0630814077205
+variable_range,  [432, 495]
+numerator/denominator = inf/inf
+, prob =  nan
+
+
+/usr/local/miniconda3/envs/blogplt2/lib/python2.7/site-packages/ipykernel_launcher.py:25: RuntimeWarning: invalid value encountered in double_scalars
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Grr, dang still getting a `nan` as an output, like the numbers are just too big?</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">comb</span><span class="p">(</span><span class="nb">long</span><span class="p">(</span><span class="mi">10000</span><span class="p">),</span> <span class="nb">long</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>inf
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Okay, try again with this module called gmpy..</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gmpy</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_probability_that_sample_prob_is_in_range__gmpy</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">some_range</span><span class="p">,</span> <span class="p">):</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Q</span><span class="o">/</span><span class="n">M</span> <span class="p">;</span> <span class="k">assert</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">get_sample_sigma</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">some_range</span>
+
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="n">n</span>
+
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+        <span class="n">gmpy</span><span class="o">.</span><span class="n">comb</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">gmpy</span><span class="o">.</span><span class="n">comb</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="p">])</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+        <span class="n">gmpy</span><span class="o">.</span><span class="n">comb</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">gmpy</span><span class="o">.</span><span class="n">comb</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="k">print</span> <span class="s1">&#39;numerator/denominator = </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">numerator</span><span class="o">/</span><span class="n">denominator</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">parameters100k</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span> <span class="c1"># too big !</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">46402</span><span class="p">}</span>
+<span class="n">parameters10k</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+             <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="mi">5000</span><span class="p">,</span>
+             <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mi">4640</span><span class="p">}</span>
+
+<span class="n">sample_range_dict</span> <span class="o">=</span> <span class="n">make_2sigma_Q_range</span><span class="p">(</span><span class="n">parameters10k</span><span class="p">)</span>
+<span class="n">sample_prob_range</span><span class="p">,</span> <span class="n">variable_range</span> <span class="o">=</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range1&#39;</span><span class="p">],</span> <span class="n">sample_range_dict</span><span class="p">[</span><span class="s1">&#39;range2&#39;</span><span class="p">]</span>
+<span class="n">range_size</span> <span class="o">=</span> <span class="n">sample_prob_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_prob_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span> <span class="s1">&#39;sample_prob_range, &#39;</span><span class="p">,</span> <span class="n">sample_prob_range</span><span class="p">,</span> <span class="s1">&#39;, size: &#39;</span><span class="p">,</span> <span class="n">range_size</span>
+<span class="k">print</span> <span class="s1">&#39;variable_range, &#39;</span><span class="p">,</span> <span class="n">variable_range</span>
+
+<span class="n">prob</span> <span class="o">=</span> <span class="n">calculate_probability_that_sample_prob_is_in_range__gmpy</span><span class="p">(</span>
+                    <span class="n">parameters10k</span><span class="p">,</span> <span class="n">variable_range</span><span class="p">)</span>
+<span class="k">print</span> <span class="s1">&#39;, prob = &#39;</span><span class="p">,</span> <span class="n">prob</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>sample_prob_range,  [0.44989456842205816, 0.4781054315779419] , size:  0.0282108631559
+variable_range,  [2249, 2390]
+numerator/denominator = 406646260227882562929595546890831658833130857333480088012541921159188335635213228469064540732979455731694093002872700501672900201639116880591220207199836591718640189348711618284341072291251905051041167823231805359009481806319441429943753584472457826716322507699488893523316152158996895687809705686924017563358574462391124937846476179447897903241352056204989937347816741821452444164484164684338978683322327502878345249861629517380420966690802526738231543374717811778911435024843861507222278938937755921601565884736528406901814346246566896912356504380819552640802801959069986654442024510138183282997534556042608810258798292571247257274018413370330219519891555811583663089636866349134243336993224211951937998243594977086003390513355335699524686326180181092371804444159804720576481274752981284895736011271157078496708290761167540162325775098064802237864745924955099218900743390125584955900458840119782322635673631565831116288585601517822434242537960014079157545967175707151022423799365576523795184088432873017655825925024584848738183873680351332159608240694541473264132842161855839101315812355328276350773230726739002322769078643374373687258105572729947442469322207960806704724844479686915848814727987937856663728349113868267465640137255162997842104856375196433364568614229767272022386928705045932433034081854113188079705759178530157486100903489793648694691575263863601854892026555338304340710766541722955546887775410151920884325194320392015118146106410089724865402632750744373372757858453705668368549215333789589961754394500533950095062963229566118386624854702010646162493269171067383364130010533724177880319055042223840817169768146160775226339861328900700330181626495909523001390350601931727684256172206173593016289131903528068380447599840368347019098425860892521483577214899820478570495903864689869309423729559114887969382027819401577855505115179667621768803141604444844144406133604433073535515121423243935159213657620276184257562094910508120268897735582801829467277813667998322073742826650143645793052014234196682724979559641851248504506803156007985862778289842475745719486592600902696914234510095630315398276138004234392646498432327758824889543089941597522418058649100485949181926177759743167174903590492975507920100289141406667265473308646764408345782486242586015769518680801992741087018230454244256982205721800660824840824712333613395588916498983355220805354529864569837234570035663121852717693258361219551992590120087418238713977329183434111777213595795889684871006556136284004103126006338689267079733897315148042254860380506508330155051896233130914378567805235636377283509462949037497489886490892192399572785526708185717380636770989431618495723029606221500315016735154367013425208168322756040115292963905919680582326151789904328737614240553154633379933184822719744854192497531933192854960211817647832133594274184923981654088252899692117297225488092534595680506485435001239169820078455787543277526676184747904406911764009856452020715175671646250366525287713973168430532091147973760464323480358617494650295813997072308290198130376838619646591171988493081298930296297640298264461282090270951824328319263809160677440792467188550470081641192787738466168273716283856194817138403735528301976390970820057258376995427759361302310105452318120971659822807446832513703429528703636217806571520798561041363633566409923337949829426645607351418700474567919690641176956400715027142365437694209186210558452024018054654788162034628937533912517081631219410264682023390619689312304628866875455696432740464232787553216009671973869828188433443444214109660610860075307001598433104614527726015945050000/1375435566361193112215346881437048377755841706494567687790578773338904454205068776929549565651834530062546302385994413718650297648644758457974866528250922071836991622243360684841529721295889179457841190158670443490381151746938647226086508374788887366968866035471936881534792272427721676538201008233133098517142265172704027606386455107503609521792104267176163273791295544437807368308016169258012550557292920297526080919712667965491282634415430773741910525025854067613040195740808751506890889755022221550555836017357394920133992718744037121178892900986361730136702010253867862055485803890088347428565231166752844371715651211295734431091599324908642644747553697316656310657747178361361258154564459702150343383918418719549877304874735954620544897787709154375638546998513169411326840690577826128130470687465356791816535636036003156188143197042652487224201565539886750017997752417772129803525965579883116573752961483742516766610577261623916218914997196522747907471959332728698853732350201689872339621574887957273559456450987820659097482556174676272219288123540349278617621821618507084003764391746186170004659619620597315667377754755862812100319258837151875970223076076670823247573295790437518993522259068179847552625686555768902624900683662256566339794512764644055217919812369378141762340057515300853461050600912533982762393336728571101147446078354399830027743016332578074959911693274964989435090866726430787238863478350495720182851290126491055639133843800200120850555152478605614914612302900810399771964836118767453658054810990676373238755601818999380124050127586829879451662944963737474202817759402627652341271402436677704459272888069753413816163277051635319398386343646901695779049609038945355014723525630655881780073135380854057197359430867259035882730796450500477686556037695317283478386668026646769409710670678032086920896220438732609173372623246281720560326797982632073453762219458965810305734845681706926662211153804043855293975726055405112312865049259999341700467533708818404899229814570010041439514989881134819347262565521084747437999668705122140922183140272136342674751731985461242592125943320457199036425347689823821025457736539060612155320621505958765258244133386293116973297709995333136512544722757362921604267715135149506543519558039528468985585968853924883653939456263226359901156239922528959172308416288978440560667352364449561424826261349425895869897454941923973453803058358214166902072120635482060590688473019047830862187070983120583511825211739314358595017557736241905102369919091110844201137601192339387714471168397067438516959821492682060217731006136364110774936757680431303886538157042448045627834746096534830766545893838228632591427433243532025785235532430246996873515633398754733705696634786553767117769260941989250588582829345027502058744762635849082504477447796651934696895032779213899365415295838181806413204497420584797006352665437191518504545898424214215908474090746512603048448144782771377219024890619870496168182651746217996952495848736578219783904079501830621110486701888550573349349950528650162408882988807684722898392625161436938468933149625468605262595397980252606885055324018765959438688467407620914849099972856910071281373410386886864642983436097033075332049946417077340673780275024906130742992418960477800075426590747715872324646523628673880834691881244698317756385976657426208166744126956570432060430045656485459330806231078774640550230623871773666818218865531721353586309777822650160587181417505160613460107621916251283243671386925414053533199922923919784984468768373513155504153653051867174009550814563619320863710915885052994518698771817070468730662303789202186292561062519129311950978497980738988245470737703272217579488960499701118371594839954410355373682145805601770481850155216158966439415087541971706390030633064884729407638923224
+, prob =  2.95649080315475971549e-190
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># Hmm ok, so this module clearly handles the numbers nicely, </span>
+<span class="c1"># but there must be some flaw in my calculation..</span>
+</pre></div>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="../what-does-sampling-do-to-a-rate.html" rel="bookmark"
+                           title="Permalink to What does sampling do to a rate">What does sampling do to a rate</a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2017-12-28T15:00:01-05:00">
                 Published: Thu 28 December 2017
@@ -33,334 +405,12 @@
         </address>
 <p>In <a href="../category/pandas.html">pandas</a>.</p>
 <p>tags: <a href="../tag/sampling.html">sampling</a> <a href="../tag/probability.html">probability</a> <a href="../tag/visualization.html">visualization</a> <a href="../tag/pandas.html">pandas</a> </p>
-</footer><!-- /.post-info --><h3>Notes</h3>
+</footer><!-- /.post-info -->                <h3>Notes</h3>
 <p>if we have error T,F, in a population of Sentry data. but we have the roughly 10% sampled output. And observe an error rate, what is the probability range for this error rate? </p>
-<p>(side context is that these are "address validation" sentry logs. and my "error rate" here is the address output being empty [] ). Otherwise it is the (1 - pass rate) basically. </p>
-<p>This would be cool to do some example code around, w/ trials. </p>
-<h3>trials</h3>
-<p>There are a few ways to think about this. Sampling feels like removing items from a bag and throwing out 90% of them, but at random, for example.</p>
-<p>For a simpler scenario, let's first use the Python <code>random</code> library to see what sampling does to the <em>True Rate</em>.</p>
-<h4>Setup</h4>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="n">n_experiments</span> <span class="o">=</span> <span class="mi">100000</span>
-<span class="n">n_trials</span> <span class="o">=</span> <span class="mi">10000</span>
-
-<span class="k">def</span> <span class="nf">run_an_experiment</span><span class="p">(</span><span class="n">n_trials</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Run an experiment, for n trials,</span>
-
-<span class="sd">    With sampling probability, use a trial result</span>
-<span class="sd">    for the tabulation, otherwise, ignore it</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_trials</span><span class="p">):</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
-            <span class="c1"># True rate</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
-                <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;sampled_true&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">counts</span><span class="p">[</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-
-    <span class="k">return</span> <span class="n">counts</span>
-
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">experiments</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_experiments</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">run_an_experiment</span><span class="p">(</span><span class="n">n_trials</span><span class="p">)</span>
-        <span class="n">experiments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">dfraw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dfraw</span>
-</pre></div>
-
-
-<ul>
-<li>running this...</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">experiment</span>
-
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">results</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="mi">100</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="n">results</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">4</span><span class="p">]:</span> 
-<span class="p">[{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">210</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">840</span><span class="p">},</span>
- <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">199</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">821</span><span class="p">},</span>
- <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">170</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">775</span><span class="p">},</span>
- <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">186</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">840</span><span class="p">},</span>
- <span class="p">{</span><span class="s1">&#39;sampled_false&#39;</span><span class="p">:</span> <span class="mi">214</span><span class="p">,</span> <span class="s1">&#39;sampled_true&#39;</span><span class="p">:</span> <span class="mi">784</span><span class="p">}]</span>
-</pre></div>
-
-
-<ul>
-<li>Okay. that was instantaneous and output looks normal. Let's get more trials in there... ( Changed from <code>100</code> to <code>100,000</code> trials...</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">7</span><span class="p">]:</span> <span class="o">%</span><span class="n">time</span> <span class="n">results2</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
-<span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">18</span><span class="n">s</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">171</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">19</span><span class="n">s</span>
-<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">2</span><span class="nb">min</span> <span class="mi">19</span><span class="n">s</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results2</span><span class="p">)</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">8</span><span class="p">]:</span> <span class="mi">100000</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">15</span><span class="p">]:</span> <span class="n">dfraw</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">results2</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">19</span><span class="p">]:</span>     <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;sampleTrueRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_true</span> <span class="o">/</span> <span class="p">(</span><span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_true</span> <span class="o">+</span>
-    <span class="o">...</span><span class="p">:</span>  <span class="n">dfraw</span><span class="o">.</span><span class="n">sampled_false</span><span class="p">)</span>
-    <span class="o">...</span><span class="p">:</span> 
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">20</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">20</span><span class="p">]:</span> 
-   <span class="n">sampled_false</span>  <span class="n">sampled_true</span>  <span class="n">sampleTrueRate</span>
-<span class="mi">0</span>            <span class="mi">194</span>           <span class="mi">754</span>        <span class="mf">0.795359</span>
-<span class="mi">1</span>            <span class="mi">212</span>           <span class="mi">795</span>        <span class="mf">0.789474</span>
-<span class="mi">2</span>            <span class="mi">200</span>           <span class="mi">780</span>        <span class="mf">0.795918</span>
-<span class="mi">3</span>            <span class="mi">194</span>           <span class="mi">822</span>        <span class="mf">0.809055</span>
-<span class="mi">4</span>            <span class="mi">201</span>           <span class="mi">774</span>        <span class="mf">0.793846</span>
-</pre></div>
-
-
-<ul>
-<li>now lets bin this sample true rate , using the nearest hundredth.</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">26</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampleTrueRate</span><span class="o">.</span><span class="n">head</span><span class="p">()</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">de</span>
-    <span class="o">...</span><span class="p">:</span> <span class="n">cimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.01&#39;</span><span class="p">)))</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">26</span><span class="p">]:</span> 
-<span class="mi">0</span>    <span class="mf">0.80</span>
-<span class="mi">1</span>    <span class="mf">0.79</span>
-<span class="mi">2</span>    <span class="mf">0.80</span>
-<span class="mi">3</span>    <span class="mf">0.81</span>
-<span class="mi">4</span>    <span class="mf">0.79</span>
-<span class="n">Name</span><span class="p">:</span> <span class="n">sampleTrueRate</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">27</span><span class="p">]:</span> <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">sampleTrueRate</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">deci</span>
-    <span class="o">...</span><span class="p">:</span> <span class="n">mal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;0.01&#39;</span><span class="p">)))</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">30</span><span class="p">]:</span> <span class="n">dfraw</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">30</span><span class="p">]:</span> 
-   <span class="n">sampled_false</span>  <span class="n">sampled_true</span>  <span class="n">sampleTrueRate</span> <span class="n">sampleTrueRateRounded</span>
-<span class="mi">0</span>            <span class="mi">194</span>           <span class="mi">754</span>        <span class="mf">0.795359</span>                  <span class="mf">0.80</span>
-<span class="mi">1</span>            <span class="mi">212</span>           <span class="mi">795</span>        <span class="mf">0.789474</span>                  <span class="mf">0.79</span>
-<span class="mi">2</span>            <span class="mi">200</span>           <span class="mi">780</span>        <span class="mf">0.795918</span>                  <span class="mf">0.80</span>
-<span class="mi">3</span>            <span class="mi">194</span>           <span class="mi">822</span>        <span class="mf">0.809055</span>                  <span class="mf">0.81</span>
-<span class="mi">4</span>            <span class="mi">201</span>           <span class="mi">774</span>        <span class="mf">0.793846</span>                  <span class="mf">0.79</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">32</span><span class="p">]:</span> <span class="n">dfraw</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dfraw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">36</span><span class="p">]:</span> <span class="n">gpby</span> <span class="o">=</span> <span class="n">dfraw</span><span class="p">[[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">,</span> <span class="s1">&#39;unit&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;sampleTrueRa</span>
-    <span class="o">...</span><span class="p">:</span> <span class="n">teRounded</span><span class="s1">&#39;)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">37</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">39</span><span class="p">]:</span> <span class="n">bindf</span> <span class="o">=</span> <span class="n">gpby</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">40</span><span class="p">]:</span> <span class="n">bindf</span><span class="o">.</span><span class="n">shape</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">40</span><span class="p">]:</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">41</span><span class="p">]:</span> <span class="n">bindf</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">41</span><span class="p">]:</span> 
-                        <span class="n">unit</span>
-<span class="n">sampleTrueRateRounded</span>       
-<span class="mf">0.74</span>                       <span class="mi">1</span>
-<span class="mf">0.75</span>                      <span class="mi">22</span>
-<span class="mf">0.76</span>                     <span class="mi">311</span>
-<span class="mf">0.77</span>                    <span class="mi">2228</span>
-<span class="mf">0.78</span>                    <span class="mi">9327</span>
-<span class="mf">0.79</span>                   <span class="mi">22550</span>
-<span class="mf">0.80</span>                   <span class="mi">30571</span>
-<span class="mf">0.81</span>                   <span class="mi">23367</span>
-<span class="mf">0.82</span>                    <span class="mi">9352</span>
-<span class="mf">0.83</span>                    <span class="mi">2040</span>
-<span class="mf">0.84</span>                     <span class="mi">217</span>
-<span class="mf">0.85</span>                      <span class="mi">14</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">42</span><span class="p">]:</span> <span class="n">bindf</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">42</span><span class="p">]:</span> 
-<span class="n">unit</span>    <span class="mi">100000</span>
-<span class="n">dtype</span><span class="p">:</span> <span class="n">int64</span>
-</pre></div>
-
-
-<ul>
-<li>Just looking at this, we see that we don't have <code>100%</code> of the trials on <code>(0.79,0.81)</code>, but it is a lot there.</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">45</span><span class="p">]:</span> <span class="n">newdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="n">bindf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">46</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;sampleTrueRateRounded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bindf</span><span class="o">.</span><span class="n">index</span>
-
-
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">53</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;Frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bindf</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">values</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">55</span><span class="p">]:</span> <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;RelativeFrequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newdf</span><span class="o">.</span><span class="n">Frequency</span><span class="o">/</span><span class="mi">100000</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">56</span><span class="p">]:</span> <span class="n">newdf</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">56</span><span class="p">]:</span> 
-   <span class="n">sampleTrueRateRounded</span>  <span class="n">Frequency</span>  <span class="n">RelativeFrequency</span>
-<span class="mi">0</span>                   <span class="mf">0.74</span>          <span class="mi">1</span>            <span class="mf">0.00001</span>
-<span class="mi">1</span>                   <span class="mf">0.75</span>         <span class="mi">22</span>            <span class="mf">0.00022</span>
-<span class="mi">2</span>                   <span class="mf">0.76</span>        <span class="mi">311</span>            <span class="mf">0.00311</span>
-<span class="mi">3</span>                   <span class="mf">0.77</span>       <span class="mi">2228</span>            <span class="mf">0.02228</span>
-<span class="mi">4</span>                   <span class="mf">0.78</span>       <span class="mi">9327</span>            <span class="mf">0.09327</span>
-<span class="mi">5</span>                   <span class="mf">0.79</span>      <span class="mi">22550</span>            <span class="mf">0.22550</span>
-<span class="mi">6</span>                   <span class="mf">0.80</span>      <span class="mi">30571</span>            <span class="mf">0.30571</span>
-<span class="mi">7</span>                   <span class="mf">0.81</span>      <span class="mi">23367</span>            <span class="mf">0.23367</span>
-<span class="mi">8</span>                   <span class="mf">0.82</span>       <span class="mi">9352</span>            <span class="mf">0.09352</span>
-<span class="mi">9</span>                   <span class="mf">0.83</span>       <span class="mi">2040</span>            <span class="mf">0.02040</span>
-<span class="mi">10</span>                  <span class="mf">0.84</span>        <span class="mi">217</span>            <span class="mf">0.00217</span>
-<span class="mi">11</span>                  <span class="mf">0.85</span>         <span class="mi">14</span>            <span class="mf">0.00014</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">57</span><span class="p">]:</span> <span class="n">newdf</span><span class="o">.</span><span class="n">RelativeFrequency</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-<span class="n">Out</span><span class="p">[</span><span class="mi">57</span><span class="p">]:</span> <span class="mf">1.0</span>
-
-<span class="n">In</span> <span class="p">[</span><span class="mi">59</span><span class="p">]:</span> <span class="n">newdf</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;/blahblah/repo/sample-probabili</span>
-    <span class="o">...</span><span class="p">:</span> <span class="n">ty</span><span class="o">-</span><span class="n">experiment</span><span class="o">-</span><span class="mi">2017</span><span class="o">-</span><span class="mi">12</span><span class="o">/</span><span class="n">experiment</span><span class="o">-</span><span class="mi">2</span><span class="o">-</span><span class="n">binned</span><span class="o">.</span><span class="n">csv</span><span class="s1">&#39;, index=False)</span>
-</pre></div>
-
-
-<h4>Meanwhile in jupyter...</h4>
-<div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
-
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span>/usr/local/miniconda3/envs/blogplt/lib/python3.6/site-packages/matplotlib/font_manager.py:281: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
-  &#39;Matplotlib is building the font cache using fc-list. &#39;
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;/Users/michal/LeDropbox/Dropbox/Code/repo/sample-probability-experiment-2017-12/experiment-2-binned.csv&#39;</span>
-</pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="n">binned_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-<span class="n">binned_df</span>
-</pre></div>
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sampleTrueRateRounded</th>
-      <th>Frequency</th>
-      <th>RelativeFrequency</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.74</td>
-      <td>1</td>
-      <td>0.00001</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>0.75</td>
-      <td>22</td>
-      <td>0.00022</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>0.76</td>
-      <td>311</td>
-      <td>0.00311</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0.77</td>
-      <td>2228</td>
-      <td>0.02228</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>0.78</td>
-      <td>9327</td>
-      <td>0.09327</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>0.79</td>
-      <td>22550</td>
-      <td>0.22550</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>0.80</td>
-      <td>30571</td>
-      <td>0.30571</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>0.81</td>
-      <td>23367</td>
-      <td>0.23367</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>0.82</td>
-      <td>9352</td>
-      <td>0.09352</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>0.83</td>
-      <td>2040</td>
-      <td>0.02040</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>0.84</td>
-      <td>217</td>
-      <td>0.00217</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>0.85</td>
-      <td>14</td>
-      <td>0.00014</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;sampleTrueRateRounded&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;RelativeFrequency&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">binned_df</span><span class="p">,</span> 
-                 <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;Blues_d&quot;</span><span class="p">)</span>
-</pre></div>
-
-
-<p><img alt="png" src="output_3_0.png"></p>
-<h3>Side notes</h3>
-<p>If we have a proportion of p = P(T) = 0.10 and q = P(F) = 0.9 , and we choose 10% (aka sampling rate),  this is basically like a  (10000C1000)(p^x)(q^y) for example if n=10,000. And that is for a specific value of x + y = 1000 being chosen.</p>
-<p>so yea, sampling is binomial distribution.</p>                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
+<p>(side context is that these are "address validation" sentry logs. and my "error rate" here …</p>
+                <a class="readmore" href="../what-does-sampling-do-to-a-rate.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
 
             <li><article class="hentry">
                 <header>
