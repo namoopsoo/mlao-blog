@@ -1,11 +1,10 @@
 
 #### put together our hyperlapse puzzle videos...
-
+* Merge
 ```
 time ffmpeg -safe 0 -f concat -i infiles.txt -vcodec copy -acodec copy merged.MOV
-
-
 ```
+* [full output here](#full-output-of-the-merge-command)
 and `infiles.txt`
 ```
 file ./2019-03-09\ 23.03.34.mov
@@ -34,8 +33,11 @@ sh -c ffmpeg -i "./2019-03-10 18.43.53.mov"  2>&1 |grep Duration
   Duration: 00:00:39.10, start: 0.000000, bitrate: 14868 kb/s
 ```
 * And the length of the merged movie created ... 
-
-
+```
+$ ffmpeg -i merged.MOV 2>&1|grep Duration
+  Duration: 00:02:18.10, start: 0.000000, bitrate: 14921 kb/s
+```
+* Doing some quick mental maths, that actually roughly adds up.
 
 ### Appendix
 #### full output of the merge command
