@@ -5,7 +5,7 @@
 time ffmpeg -safe 0 -f concat -i infiles.txt -vcodec copy -acodec copy merged.MOV
 ```
 * [full output here](#full-output-of-the-merge-command)
-and `infiles.txt`
+* and used this `infiles.txt` , following the directions
 ```
 file ./2019-03-09\ 23.03.34.mov
 file ./2019-03-10\ 01.21.50.mov
@@ -38,6 +38,29 @@ $ ffmpeg -i merged.MOV 2>&1|grep Duration
   Duration: 00:02:18.10, start: 0.000000, bitrate: 14921 kb/s
 ```
 * Doing some quick mental maths, that actually roughly adds up.
+
+#### Grr but at minute 1:05 it flips the video
+* What the heck? Ah according to [stackoverflow](https://superuser.com/questions/578321/how-to-rotate-a-video-180-with-ffmpeg) , ffmpeg uses rotation metadata to autorotate. Except heh in this case perhaps the autorotate did not happen when I was concatenating?
+* My file `2019-03-10 13.05.02.mov` appears to be the one which was rotated.
+* Trying to process it to see what happens...
+```
+ffmpeg -i 2019-03-10\ 13.05.02.mov -c:a copy 2019-03-10\ 13.05.02.ROTATED.mov
+
+```
+* Wow that took at least a minute. So umm, since the initial concatenation took under a second, I seriously doubt the autorotation was done during the concatenation.
+* Okay, lets try that concat one more time, this time with the new file... and new files list
+```
+file ./2019-03-09\ 23.03.34.mov
+file ./2019-03-10\ 01.21.50.mov
+file ./2019-03-10\ 13.01.46.mov
+file ./2019-03-10\ 13.03.59.mov
+file ./2019-03-10\ 13.05.02.mov
+file ./2019-03-10\ 18.43.53.mov
+```
+```
+time ffmpeg -safe 0 -f concat -i infiles.2019-03-16T2004Z.txt -vcodec copy -acodec copy 2019-03-16T2006Z-puzzle-merged.MOV
+
+```
 
 ### Appendix
 #### full output of the merge command
@@ -82,3 +105,6 @@ real	0m1.186s
 user	0m0.124s
 sys	0m0.232s
 ```
+
+#### reference
+* [xargs reference](https://shapeshed.com/unix-xargs/)
