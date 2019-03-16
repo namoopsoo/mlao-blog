@@ -1,0 +1,82 @@
+
+#### put together our hyperlapse puzzle videos...
+
+```
+time ffmpeg -safe 0 -f concat -i infiles.txt -vcodec copy -acodec copy merged.MOV
+
+
+```
+and `infiles.txt`
+```
+file ./2019-03-09\ 23.03.34.mov
+file ./2019-03-10\ 01.21.50.mov
+file ./2019-03-10\ 13.01.46.mov
+file ./2019-03-10\ 13.03.59.mov
+file ./2019-03-10\ 13.05.02.mov
+file ./2019-03-10\ 18.43.53.mov
+```
+
+#### Did it do the right thing? 
+* What are my mov lengths..
+```
+$ cat fileslist.txt |xargs -t -I % sh -c 'ffmpeg -i "%"  2>&1 |grep Duration '
+sh -c ffmpeg -i "./2019-03-09 23.03.34.mov"  2>&1 |grep Duration 
+  Duration: 00:00:30.40, start: 0.000000, bitrate: 14837 kb/s
+sh -c ffmpeg -i "./2019-03-10 01.21.50.mov"  2>&1 |grep Duration 
+  Duration: 00:00:34.50, start: 0.000000, bitrate: 14971 kb/s
+sh -c ffmpeg -i "./2019-03-10 13.01.46.mov"  2>&1 |grep Duration 
+  Duration: 00:00:00.07, start: 0.000000, bitrate: 15840 kb/s
+sh -c ffmpeg -i "./2019-03-10 13.03.59.mov"  2>&1 |grep Duration 
+  Duration: 00:00:01.40, start: 0.000000, bitrate: 16455 kb/s
+sh -c ffmpeg -i "./2019-03-10 13.05.02.mov"  2>&1 |grep Duration 
+  Duration: 00:00:32.63, start: 0.000000, bitrate: 14944 kb/s
+sh -c ffmpeg -i "./2019-03-10 18.43.53.mov"  2>&1 |grep Duration 
+  Duration: 00:00:39.10, start: 0.000000, bitrate: 14868 kb/s
+```
+* And the length of the merged movie created ... 
+
+
+
+### Appendix
+#### full output of the merge command
+```
+ffmpeg version 4.1.1 Copyright (c) 2000-2019 the FFmpeg developers
+  built with Apple LLVM version 10.0.0 (clang-1000.11.45.5)
+  configuration: --prefix=/usr/local/Cellar/ffmpeg/4.1.1 --enable-shared --enable-pthreads --enable-version3 --enable-hardcoded-tables --enable-avresample --cc=clang --host-cflags='-I/Library/Java/JavaVirtualMachines/openjdk-11.0.2.jdk/Contents/Home/include -I/Library/Java/JavaVirtualMachines/openjdk-11.0.2.jdk/Contents/Home/include/darwin' --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libbluray --enable-libmp3lame --enable-libopus --enable-librubberband --enable-libsnappy --enable-libtesseract --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-librtmp --enable-libspeex --enable-videotoolbox --disable-libjack --disable-indev=jack --enable-libaom --enable-libsoxr
+  libavutil      56. 22.100 / 56. 22.100
+  libavcodec     58. 35.100 / 58. 35.100
+  libavformat    58. 20.100 / 58. 20.100
+  libavdevice    58.  5.100 / 58.  5.100
+  libavfilter     7. 40.101 /  7. 40.101
+  libavresample   4.  0.  0 /  4.  0.  0
+  libswscale      5.  3.100 /  5.  3.100
+  libswresample   3.  3.100 /  3.  3.100
+  libpostproc    55.  3.100 / 55.  3.100
+Input #0, concat, from 'infiles.txt':
+  Duration: N/A, start: 0.000000, bitrate: 14833 kb/s
+    Stream #0:0(und): Video: hevc (Main) (hvc1 / 0x31637668), yuvj420p(pc), 1920x1080, 14833 kb/s, 30 fps, 30 tbr, 600 tbn, 600 tbc
+    Metadata:
+      rotate          : 180
+      creation_time   : 2019-03-10T05:20:20.000000Z
+      handler_name    : Core Media Video
+      encoder         : HEVC
+Output #0, mov, to 'merged.MOV':
+  Metadata:
+    encoder         : Lavf58.20.100
+    Stream #0:0(und): Video: hevc (Main) (hvc1 / 0x31637668), yuvj420p(pc), 1920x1080, q=2-31, 14833 kb/s, 30 fps, 30 tbr, 19200 tbn, 600 tbc
+    Metadata:
+      rotate          : 180
+      creation_time   : 2019-03-10T05:20:20.000000Z
+      handler_name    : Core Media Video
+      encoder         : HEVC
+Stream mapping:
+  Stream #0:0 -> #0:0 (copy)
+Press [q] to stop, [?] for help
+[mov @ 0x7fba5d80dc00] Non-monotonous DTS in output stream 0:0; previous: 1246080, current: 1246080; changing to 1246081. This may result in incorrect timestamps in the output file.
+frame= 2828 fps=0.0 q=-1.0 size=  172544kB time=00:01:34.20 bitrate=15005.1kbitsframe= 4142 fps=0.0 q=-1.0 Lsize=  251538kB time=00:02:18.00 bitrate=14931.9kbits/s speed= 148x    
+video:251484kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.021355%
+
+real	0m1.186s
+user	0m0.124s
+sys	0m0.232s
+```
