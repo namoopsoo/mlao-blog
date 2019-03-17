@@ -1,6 +1,6 @@
 
 #### Put together our hyperlapse puzzle videos...
-* Merge
+* First stab at a merge using `ffmpeg`
 ```
 time ffmpeg -safe 0 -f concat -i infiles.txt -vcodec copy -acodec copy merged.MOV
 ```
