@@ -1,5 +1,5 @@
 
-#### put together our hyperlapse puzzle videos...
+#### Put together our hyperlapse puzzle videos...
 * Merge
 ```
 time ffmpeg -safe 0 -f concat -i infiles.txt -vcodec copy -acodec copy merged.MOV
@@ -61,6 +61,7 @@ file ./2019-03-10\ 18.43.53.mov
 time ffmpeg -safe 0 -f concat -i infiles.2019-03-16T2004Z.txt -vcodec copy -acodec copy 2019-03-16T2006Z-puzzle-merged.MOV
 
 ```
+* Unfortunately, `2019-03-16T2006Z-puzzle-merged.MOV` is even worse, because for some reason, only one frame is displayed for several minutes. So some more tweaking is needed.
 
 ### Appendix
 #### full output of the merge command
